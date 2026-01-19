@@ -4,6 +4,8 @@ import TodayPriceSection from "../components/TodayPriceSection";
 import PricePredictionSection from "../components/PricePredictionSection";
 import WeatherSection from "../components/WeatherSection";
 import SmartInsightsSection from "../components/SmartInsightsSection";
+import SellCropSection from "../components/SellCropSection";
+import PickupStatusSection from "../components/PickupStatusSection";
 
 import {
   ShoppingCart,
@@ -18,6 +20,7 @@ import {
 } from "lucide-react";
 import logo from "../assets/logo.jpg";
 
+/* ---------------- LANGUAGE TEXT ---------------- */
 const TEXT = {
   en: {
     title: "Smart Agriculture",
@@ -78,11 +81,12 @@ const TEXT = {
 export default function Dashboard() {
   const [lang, setLang] = useState("en");
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [showSellCrop, setShowSellCrop] = useState(false);
   const t = TEXT[lang];
 
   return (
     <div className="min-h-screen bg-green-50 flex flex-col">
-      {/* NAVBAR */}
+      {/* ---------------- NAVBAR ---------------- */}
       <header className="bg-white shadow px-4 py-3 flex justify-between items-center sticky top-0 z-20">
         <div className="flex items-center gap-2">
           <img src={logo} alt="logo" className="h-8 w-8" />
@@ -90,8 +94,20 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-4">
-          <NavItem icon={<ShoppingCart size={18} />} label={t.sell} />
-          <NavItem icon={<Truck size={18} />} label={t.track} />
+          {/* Sell Crop → Modal */}
+          <NavItem
+            icon={<ShoppingCart size={18} />}
+            label={t.sell}
+            onClick={() => setShowSellCrop(true)}
+          />
+
+          {/* Track Order → Pickup Status Page */}
+          <NavItem
+            icon={<Truck size={18} />}
+            label={t.track}
+            onClick={() => setActiveSection("pickupStatus")}
+          />
+
           <NavItem icon={<User size={18} />} label={t.profile} />
           <NavItem icon={<HelpCircle size={18} />} label={t.support} />
 
@@ -107,90 +123,71 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* BODY */}
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-        {/* LEFT SIDEBAR */}
-        <aside className="bg-white shadow w-full lg:w-72 p-3 overflow-x-auto">
+      {/* ---------------- BODY ---------------- */}
+      <div className="flex flex-col lg:flex-row flex-1">
+        {/* -------- SIDEBAR -------- */}
+        <aside className="bg-white shadow w-full lg:w-72 p-3">
           <div className="flex lg:flex-col gap-2">
-            <SectionItem
-              icon={<MapPin size={18} />}
-              title={t.location}
+            <SectionItem icon={<MapPin size={18} />} title={t.location}
               active={activeSection === "location"}
               onClick={() => setActiveSection("location")}
             />
-            <SectionItem
-              icon={<Wheat size={18} />}
-              title={t.todayPrice}
+            <SectionItem icon={<Wheat size={18} />} title={t.todayPrice}
               active={activeSection === "todayPrice"}
               onClick={() => setActiveSection("todayPrice")}
             />
-            <SectionItem
-              icon={<TrendingUp size={18} />}
-              title={t.prediction}
+            <SectionItem icon={<TrendingUp size={18} />} title={t.prediction}
               active={activeSection === "pricePrediction"}
               onClick={() => setActiveSection("pricePrediction")}
             />
-            <SectionItem
-              icon={<CloudRain size={18} />}
-              title={t.weather}
+            <SectionItem icon={<CloudRain size={18} />} title={t.weather}
               active={activeSection === "weather"}
               onClick={() => setActiveSection("weather")}
             />
-            <SectionItem
-              icon={<Lightbulb size={18} />}
-              title={t.insights}
+            <SectionItem icon={<Lightbulb size={18} />} title={t.insights}
               active={activeSection === "insights"}
               onClick={() => setActiveSection("insights")}
             />
           </div>
         </aside>
 
-        {/* CENTER CONTENT */}
-        <main className="flex-1 overflow-y-auto p-4">
+        {/* -------- MAIN CONTENT -------- */}
+        <main className="flex-1 p-4 overflow-y-auto">
           {activeSection === "location" && <LocationSection />}
           {activeSection === "todayPrice" && <TodayPriceSection />}
           {activeSection === "pricePrediction" && <PricePredictionSection />}
           {activeSection === "weather" && <WeatherSection />}
           {activeSection === "insights" && <SmartInsightsSection />}
+          {activeSection === "pickupStatus" && (
+            <PickupStatusSection lang={lang} />
+          )}
 
           {activeSection === "dashboard" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-              <SmallCard
-                icon={<Wheat className="text-green-600" size={24} />}
-                title={t.cards.today}
-                value="Wheat ₹2,280"
-                sub="Rice ₹2,100"
-              />
-              <SmallCard
-                icon={<TrendingUp className="text-blue-600" size={24} />}
-                title={t.cards.future}
-                value="Wheat Rising"
-                sub="Onion Falling"
-              />
-              <SmallCard
-                icon={<CloudRain className="text-indigo-600" size={24} />}
-                title={t.cards.weather}
-                value="32°C"
-                sub="Rain in 2 days"
-              />
-              <SmallCard
-                icon={<Truck className="text-orange-600" size={24} />}
-                title={t.cards.pickup}
-                value="2 Completed"
-                sub="1 Scheduled"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SmallCard icon={<Wheat size={24} />} title={t.cards.today} value="₹2,280" sub="Rice ₹2,100" />
+              <SmallCard icon={<TrendingUp size={24} />} title={t.cards.future} value="Rising" sub="Onion Falling" />
+              <SmallCard icon={<CloudRain size={24} />} title={t.cards.weather} value="32°C" sub="Rain in 2 days" />
+              <SmallCard icon={<Truck size={24} />} title={t.cards.pickup} value="2 Active" sub="1 Completed" />
             </div>
           )}
         </main>
       </div>
+
+      {/* -------- SELL CROP MODAL -------- */}
+      {showSellCrop && (
+        <SellCropSection
+          lang={lang}
+          onClose={() => setShowSellCrop(false)}
+        />
+      )}
     </div>
   );
 }
 
-// ------------------- Helper Components -------------------
-function NavItem({ icon, label }) {
+/* ---------------- HELPERS ---------------- */
+function NavItem({ icon, label, onClick }) {
   return (
-    <button className="flex items-center gap-1 text-sm hover:text-green-600">
+    <button onClick={onClick} className="flex items-center gap-1 text-sm hover:text-green-600">
       {icon}
       <span className="hidden sm:inline">{label}</span>
     </button>
@@ -201,7 +198,7 @@ function SectionItem({ icon, title, active, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer whitespace-nowrap ${
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer ${
         active ? "bg-green-200 font-semibold" : "bg-green-50 hover:bg-green-100"
       }`}
     >
@@ -213,7 +210,7 @@ function SectionItem({ icon, title, active, onClick }) {
 
 function SmallCard({ icon, title, value, sub }) {
   return (
-    <div className="bg-white rounded-xl shadow h-44 flex flex-col justify-center items-center gap-2 text-center">
+    <div className="bg-white rounded-xl shadow h-44 flex flex-col justify-center items-center gap-2">
       {icon}
       <h3 className="font-semibold">{title}</h3>
       <p className="text-lg font-bold">{value}</p>
